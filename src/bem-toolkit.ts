@@ -1,19 +1,24 @@
-import ClassList from './bem-toolkit.classlist';
-import BEMNodes from './bem-toolkit.bem-nodes';
-import BEMNodeList from './bem-toolkit.bem-nodelist';
+import ClassList from './classlist';
+import BEMNodes from './bem-nodes';
+import BEMNodeList from './bem-nodelist';
 
 declare global {
     interface Element {
         getBEMBlockName(blockNameNeedle?: string): string;
-        getBEMElementName(blockNameNeedle?: string): string;
+        getBEMElementName(requiredBlockName?: string): string;
         getBEMModifiers(requiredBlockName?: string): string[];
-        addBEMModifier(modifier: string): void;
-        removeBEMModifier(modifier: string): void;
-        hasBEMModifier(modifier: string): boolean;
-        toggleBEMModifier(modifier: string, force?: boolean): void;
-        getBEMBlockRoot(): Element;
-        getNodes(): BEMNodes;
-        findBEM(elementName: string, modifierName?: string, findRoot?: boolean): BEMNodeList;
+        addBEMModifier(modifier: string, requiredBlockName?: string): void;
+        removeBEMModifier(modifier: string, requiredBlockName?: string): void;
+        hasBEMModifier(modifier: string, requiredBlockName?: string): boolean;
+        toggleBEMModifier(modifier: string, force?: boolean, requiredBlockName?: string): void;
+        getBEMBlockRoot(requiredBlockName?: string): Element;
+        getNodes(mustInclude?: string[], requiredBlockName?: string): BEMNodes;
+        findBEM(
+            elementName: string,
+            modifierName?: string,
+            findRoot?: boolean,
+            requiredBlockName?: string
+        ): BEMNodeList;
     }
 }
 
@@ -36,6 +41,7 @@ Element.prototype.getBEMBlockName = function getBEMBlockName(blockNameNeedle?: s
             const blockName = elClass.split('__')[0];
             if (blockName === blockNameNeedle) return blockName;
         }
+        return undefined;
     }
 
     return classList[0].split('--')[0].split('__')[0];
@@ -44,7 +50,7 @@ Element.prototype.getBEMBlockName = function getBEMBlockName(blockNameNeedle?: s
 /**
  * Returns the BEM element name of an element
  */
-Element.prototype.getBEMElementName = function getBEMElementName(blockNameNeedle?: string): string {
+Element.prototype.getBEMElementName = function getBEMElementName(requiredBlockName?: string): string {
     const element = this as Element;
     const classList = new ClassList(this);
 
@@ -52,14 +58,14 @@ Element.prototype.getBEMElementName = function getBEMElementName(blockNameNeedle
 
     let elementClass = element.classList[0];
 
-    if (blockNameNeedle) {
+    if (requiredBlockName) {
         /**
-         * If blockNameNeedle is given, find first class that has that blockname and return that element
+         * If requiredBlockName is given, find first class that has that blockname and return that element
          */
         for (let index = 0; index < element.classList.length; index++) {
             const elClass = element.classList[index];
             const blockName = elClass.split('__')[0];
-            if (blockName === blockNameNeedle) {
+            if (blockName === requiredBlockName) {
                 elementClass = elClass;
                 break;
             }
@@ -67,7 +73,7 @@ Element.prototype.getBEMElementName = function getBEMElementName(blockNameNeedle
     }
 
     try {
-        return elementClass.split(`${element.getBEMBlockName(blockNameNeedle)}__`)[1].split('--')[0];
+        return elementClass.split(`${element.getBEMBlockName(requiredBlockName)}__`)[1].split('--')[0];
     } catch (_) {
         return null;
     }
@@ -99,11 +105,11 @@ Element.prototype.getBEMModifiers = function getBEMModifiers(requiredBlockName?:
 /**
  * Adds a BEM modifier
  */
-Element.prototype.addBEMModifier = function addBEMModifier(modifier): void {
+Element.prototype.addBEMModifier = function addBEMModifier(modifier: string, requiredBlockName?: string): void {
     const classList = new ClassList(this);
     const element = this as Element;
 
-    const blockName = element.getBEMBlockName();
+    const blockName = requiredBlockName ? requiredBlockName : element.getBEMBlockName();
     const elementName = element.getBEMElementName();
     const classPrefix = elementName ? `${blockName}__${elementName}` : `${blockName}`;
 
@@ -113,11 +119,11 @@ Element.prototype.addBEMModifier = function addBEMModifier(modifier): void {
 /**
  * Removes a BEM modifier
  */
-Element.prototype.removeBEMModifier = function removeBEMModifier(modifier): void {
+Element.prototype.removeBEMModifier = function removeBEMModifier(modifier: string, requiredBlockName?: string): void {
     const classList = new ClassList(this);
     const element = this as Element;
 
-    const blockName = element.getBEMBlockName();
+    const blockName = requiredBlockName ? requiredBlockName : element.getBEMBlockName();
     const elementName = element.getBEMElementName();
     const classPrefix = elementName ? `${blockName}__${elementName}` : `${blockName}`;
 
@@ -127,18 +133,18 @@ Element.prototype.removeBEMModifier = function removeBEMModifier(modifier): void
 /**
  * Returns whether an element has a specific BEM Modifier enabled
  */
-Element.prototype.hasBEMModifier = function hasBEMModifier(modifier): boolean {
-    return (this as Element).getBEMModifiers().indexOf(modifier) > -1;
+Element.prototype.hasBEMModifier = function hasBEMModifier(modifier, requiredBlockName?: string): boolean {
+    return (this as Element).getBEMModifiers(requiredBlockName).indexOf(modifier) > -1;
 };
 
 /**
  * Toggles a BEM modifier on or off
  */
-Element.prototype.toggleBEMModifier = function toggleBEMModifier(modifier, force?): void {
+Element.prototype.toggleBEMModifier = function toggleBEMModifier(modifier, force?, requiredBlockName?: string): void {
     const classList = new ClassList(this);
     const element = this as Element;
 
-    const blockName = (this as Element).getBEMBlockName();
+    const blockName = requiredBlockName ? requiredBlockName : (this as Element).getBEMBlockName();
     const elementName = element.getBEMElementName();
     const classPrefix = elementName ? `${blockName}__${elementName}` : `${blockName}`;
 
@@ -155,16 +161,16 @@ Element.prototype.toggleBEMModifier = function toggleBEMModifier(modifier, force
 /**
  * Finds oldest ancestor that belongs to the block
  */
-Element.prototype.getBEMBlockRoot = function getBEMBlockRoot(): Element {
+Element.prototype.getBEMBlockRoot = function getBEMBlockRoot(requiredBlockName?: string): Element {
     const element = this as Element;
 
-    const block = element.getBEMBlockName();
+    const blockName = requiredBlockName ? requiredBlockName : element.getBEMBlockName();
     let highest = element;
 
     let el = this as Element;
     while (el.parentNode) {
         el = el.parentNode as Element;
-        if (typeof el.getBEMBlockName !== 'undefined' && el.getBEMBlockName() === block) highest = el;
+        if (typeof el.getBEMBlockName !== 'undefined' && el.getBEMBlockName() === blockName) highest = el;
     }
     return highest;
 };
@@ -172,8 +178,8 @@ Element.prototype.getBEMBlockRoot = function getBEMBlockRoot(): Element {
 /**
  * Returns a BEMNodes element with it's base in the Element
  */
-Element.prototype.getNodes = function getNodes(mustInclude?: string[]): BEMNodes {
-    return new BEMNodes(this, mustInclude);
+Element.prototype.getNodes = function getNodes(mustInclude?: string[], requiredBlockName?: string): BEMNodes {
+    return new BEMNodes(this, { mustInclude, blockName: requiredBlockName });
 };
 
 /**
@@ -185,15 +191,16 @@ Element.prototype.getNodes = function getNodes(mustInclude?: string[]): BEMNodes
 Element.prototype.findBEM = function findBEM(
     elementName: string,
     modifierName?: string,
-    findRoot = false
+    findRoot = false,
+    requiredBlockName?: string
 ): BEMNodeList {
     const element = findRoot === true ? (this as Element).getBEMBlockRoot() : (this as Element);
 
     const rootElementMatches = element.getBEMElementName() === elementName;
     const rootModifierMatches = element.hasBEMModifier(modifierName);
 
-    const block = element.getBEMBlockName();
-    const className = modifierName ? `${block}__${elementName}--${modifierName}` : `${block}__${elementName}`;
+    const blockName = requiredBlockName ? requiredBlockName : element.getBEMBlockName();
+    const className = modifierName ? `${blockName}__${elementName}--${modifierName}` : `${blockName}__${elementName}`;
     const nodeList = new BEMNodeList(...(<Element[]>(<any>element.querySelectorAll(`.${className}`))));
 
     if (

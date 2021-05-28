@@ -1,5 +1,12 @@
-import BEMNodeList from './bem-toolkit.bem-nodelist';
+import BEMNodeList from './bem-nodelist';
 import './bem-toolkit';
+
+interface IOptions {
+    findRoot?: boolean;
+    findGlobal?: boolean;
+    mustInclude?: string[];
+    blockName?: string;
+}
 
 /**
  * An associative array where the keys are BEM element names and the values are BEMNodeLists
@@ -9,21 +16,36 @@ import './bem-toolkit';
 export default class BEMNodes {
     [key: string]: BEMNodeList;
 
-    public constructor(target?: Element | NodeListOf<Element> | string, mustInclude?: string[], findRoot?: boolean) {
+    public constructor(target?: Element | NodeListOf<Element> | string, options?: IOptions) {
         const elements = BEMNodes.getElementsFromTarget(target);
 
         if (!elements) return;
 
-        elements.forEach((elementNeedle) => {
-            const startElement = findRoot ? elementNeedle.getBEMBlockRoot() : elementNeedle;
+        if (options.findGlobal) {
+            let blockName;
 
-            const blockName = startElement.getBEMBlockName();
+            if (typeof target === 'undefined') {
+                if (typeof options.blockName === 'undefined') {
+                    throw new Error('The option findGlobal required a target to be set or a blockName to be defined');
+                }
+            } else if (target instanceof Element) {
+                blockName = target.getBEMBlockName();
+            } else if (target instanceof NodeList) {
+                blockName = target[0].getBEMBlockName();
+            }
 
-            BEMNodes.getBlockElements(this, startElement as Element, blockName);
-        });
+            BEMNodes.getBlockElements(this, document.body as Element, options.blockName);
+        } else {
+            elements.forEach((elementNeedle) => {
+                const startElement = options.findRoot ? elementNeedle.getBEMBlockRoot() : elementNeedle;
+                const blockName = options.blockName ? options.blockName : startElement.getBEMBlockName();
 
-        if (mustInclude) {
-            if (!BEMNodes.arrayContainsArray(Object.keys(this), mustInclude)) {
+                BEMNodes.getBlockElements(this, startElement as Element, blockName);
+            });
+        }
+
+        if (options.mustInclude) {
+            if (!BEMNodes.arrayContainsArray(Object.keys(this), options.mustInclude)) {
                 throw new Error('Not all required elements were found in the DOM');
             }
         }

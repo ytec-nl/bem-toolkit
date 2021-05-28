@@ -97,11 +97,23 @@ export default class BEMNodeList extends Array<Element> {
      * @param modifier BEM modifier that needs to be set
      * @param index Index of the element that needs the modifier to be added
      */
-    public setBEMState(modifier: string, indexInput: number | number[]): void {
-        const indexes: number[] = Array.isArray(indexInput) ? (indexInput as number[]) : ([indexInput] as number[]);
+    public setBEMState(modifier: string, targetInput: number | number[] | Element | Element[], inverse = false): void {
+        let indexes: number[];
+        if (targetInput instanceof Element) {
+            indexes = [this.indexOf(targetInput)];
+        } else if (typeof targetInput === 'number') {
+            indexes = [targetInput];
+        } else {
+            indexes = targetInput.map((target: number | Element) => {
+                if (typeof target === 'number') return target;
+                if (target instanceof Element) return this.indexOf(target);
+            });
+        }
 
         this.forEach((element, elementIndex) => {
-            const setModifier = indexes.indexOf(elementIndex) !== -1;
+            let setModifier = indexes.indexOf(elementIndex) !== -1;
+            if (inverse) setModifier = !setModifier;
+
             element.toggleBEMModifier(modifier, setModifier);
         });
     }
