@@ -1,13 +1,12 @@
 {
-  "name": "bem-toolkit",
-  "version": "0.6.0",
+  "name": "@ytec-nl/bem-toolkit",
+  "version": "0.6.1",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "prepare": "npm run build"
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "prepare": "tsc"
   },
   "repository": {
     "type": "git",
