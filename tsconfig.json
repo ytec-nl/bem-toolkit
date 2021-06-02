@@ -2,8 +2,9 @@
     "compilerOptions": {
         "target": "es6",
         "declaration": true,
+        "sourceMap": true,
         "strict": false,
-        "lib": ["es2019", "es2017", "dom", "DOM.Iterable"],
+        "lib": ["es6", "es7", "es2017", "DOM", "DOM.Iterable"],
         "module": "CommonJS",
         "outDir": "lib/",
         "noImplicitAny": true

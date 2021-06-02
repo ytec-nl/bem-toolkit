@@ -16,7 +16,7 @@ interface IOptions {
 export default class BEMNodes {
     [key: string]: BEMNodeList;
 
-    public constructor(target?: Element | NodeListOf<Element> | string, options?: IOptions) {
+    public constructor(target?: Element | NodeListOf<Element> | string, options: IOptions = {}) {
         const elements = BEMNodes.getElementsFromTarget(target);
 
         if (!elements) return;

@@ -1,2 +1,4 @@
 node_modules
 /lib
+tests/html/btk-inline.js
+.nyc_output

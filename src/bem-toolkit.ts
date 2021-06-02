@@ -41,6 +41,7 @@ Element.prototype.getBEMBlockName = function getBEMBlockName(blockNameNeedle?: s
             const blockName = elClass.split('__')[0];
             if (blockName === blockNameNeedle) return blockName;
         }
+
         return undefined;
     }
 
@@ -91,14 +92,18 @@ Element.prototype.getBEMModifiers = function getBEMModifiers(requiredBlockName?:
     const blockName = requiredBlockName || element.getBEMBlockName();
     const elementName = element.getBEMElementName(blockName);
     const classPrefix = elementName ? `${blockName}__${elementName}--` : `${blockName}--`;
+
     const accumulator = [];
+
     for (let i = 0; i < classList.length; i += 1) {
         const classItem = classList[i];
-        if (classItem.indexOf(classPrefix) > -1) {
+        if (classItem.startsWith(classPrefix)) {
             const modifier = classItem.split(classPrefix)[1];
+
             if (modifier && modifier !== '') accumulator.push(modifier);
         }
     }
+
     return accumulator;
 };
 
@@ -110,7 +115,7 @@ Element.prototype.addBEMModifier = function addBEMModifier(modifier: string, req
     const element = this as Element;
 
     const blockName = requiredBlockName ? requiredBlockName : element.getBEMBlockName();
-    const elementName = element.getBEMElementName();
+    const elementName = element.getBEMElementName(blockName);
     const classPrefix = elementName ? `${blockName}__${elementName}` : `${blockName}`;
 
     classList.add(`${classPrefix}--${modifier}`);

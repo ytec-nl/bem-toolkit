@@ -5,7 +5,7 @@
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "npm run build; browserify test.index.js -o tests/html/btk-inline.js; nyc ./node_modules/.bin/_mocha 'tests/**/*.test.ts'",
         "build": "tsc",
         "prepare": "npm run build"
     },
@@ -21,6 +21,20 @@
     },
     "homepage": "https://github.com/ytec-nl/bem-toolkit#readme",
     "devDependencies": {
-        "typescript": "^4.0.3"
+        "tsconfig-paths": "^3.9.0",
+        "typescript": "^4.0.3",
+        "@testdeck/mocha": "^0.1.2",
+        "@types/chai": "^4.2.18",
+        "@types/chromedriver": "^81.0.0",
+        "@types/selenium-webdriver": "^4.0.13",
+        "@types/utf8": "^3.0.0",
+        "browserify": "^17.0.0",
+        "chai": "^4.3.4",
+        "chromedriver": "^90.0.1",
+        "mocha": "^8.4.0",
+        "nyc": "^15.1.0",
+        "selenium-webdriver": "^4.0.0-beta.3",
+        "ts-node": "^10.0.0",
+        "utf8": "^3.0.0"
     }
 }

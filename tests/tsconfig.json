@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "declaration": true,
+        "strict": false,
+        "experimentalDecorators": true,
+        "strictPropertyInitialization": false,
+        "isolatedModules": false,
+        "lib": ["es2019", "es2017", "dom", "DOM.Iterable"],
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "outDir": "lib/",
+        "noImplicitAny": true
+    },
+    "include": ["./**/*.ts"],
+    "exclude": ["../node_modules", "**/__tests__/*"],
+    "paths": {
+        "@ytec-nl/bem-toolkit/tests": ["./utility/index.ts"]
+    }
+}
