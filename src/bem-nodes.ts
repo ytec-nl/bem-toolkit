@@ -2,10 +2,9 @@ import BEMNodeList from './bem-nodelist';
 import './bem-toolkit';
 
 interface IOptions {
-    findRoot?: boolean;
-    findGlobal?: boolean;
     mustInclude?: string[];
     blockName?: string;
+    direction: 'default' | 'ancestor' | 'global';
 }
 
 /**
@@ -13,15 +12,19 @@ interface IOptions {
  *
  * Block elements without a BEM element name have the key '$bareBlock'
  */
-export default class BEMNodes {
-    [key: string]: BEMNodeList;
+export default class BEMNodes<BEMNodeListItem extends HTMLElement | SVGElement = HTMLElement> {
+    [key: string]: BEMNodeList<BEMNodeListItem>;
 
-    public constructor(target?: Element | NodeListOf<Element> | string, options: IOptions = {}) {
+    public constructor(
+        target?: BEMNodeListItem | NodeListOf<BEMNodeListItem> | string,
+        options: IOptions = { direction: 'default' }
+    ) {
         const elements = BEMNodes.getElementsFromTarget(target);
+        const instance: BEMNodes<BEMNodeListItem> = this;
 
         if (!elements) return;
 
-        if (options.findGlobal) {
+        if (options.direction === 'global') {
             let blockName;
 
             if (typeof target === 'undefined') {
@@ -34,13 +37,13 @@ export default class BEMNodes {
                 blockName = target[0].getBEMBlockName();
             }
 
-            BEMNodes.getBlockElements(this, document.body as Element, options.blockName);
+            BEMNodes.getBlockElements(instance, document.body as BEMNodeListItem, options.blockName);
         } else {
             elements.forEach((elementNeedle) => {
-                const startElement = options.findRoot ? elementNeedle.getBEMBlockRoot() : elementNeedle;
+                const startElement = options.direction === 'ancestor' ? elementNeedle.getBEMBlockRoot() : elementNeedle;
                 const blockName = options.blockName ? options.blockName : startElement.getBEMBlockName();
 
-                BEMNodes.getBlockElements(this, startElement as Element, blockName);
+                BEMNodes.getBlockElements(instance, startElement as BEMNodeListItem, blockName);
             });
         }
 
@@ -51,8 +54,8 @@ export default class BEMNodes {
         }
     }
 
-    public static create<T>(): BEMNodes {
-        return Object.create(BEMNodes.prototype) as BEMNodes;
+    public static create<S extends HTMLElement | SVGElement>(): BEMNodes<S> {
+        return Object.create(BEMNodes.prototype) as BEMNodes<S>;
     }
 
     /**
@@ -61,7 +64,12 @@ export default class BEMNodes {
      * @param key BEM element name that the Element will be added to
      * @param element Element that will be added to the BEMNodes
      */
-    public static add(bemnodesIn: BEMNodes, key: string, element: Element, blockName: string): BEMNodes {
+    public static add<T extends HTMLElement | SVGElement>(
+        bemnodesIn: BEMNodes<T>,
+        key: string,
+        element: Element,
+        blockName: string
+    ): BEMNodes<T> {
         const bemnodes = bemnodesIn;
         if (typeof bemnodes[key] === 'undefined') {
             bemnodes[key] = new BEMNodeList(element);
@@ -105,7 +113,11 @@ export default class BEMNodes {
      * @param element Current element
      * @param requiredBlockName Elements are ignored if they don't have this block name
      */
-    private static getBlockElements(accumulatorIn: BEMNodes, element: Element, requiredBlockName: string): BEMNodes {
+    private static getBlockElements<M extends HTMLElement | SVGElement>(
+        accumulatorIn: BEMNodes<M>,
+        element: M,
+        requiredBlockName: string
+    ): BEMNodes<M> {
         let accumulator = accumulatorIn;
         const elementName = element.getBEMElementName(requiredBlockName);
         const blockName = element.getBEMBlockName(requiredBlockName);
@@ -123,7 +135,7 @@ export default class BEMNodes {
         }
 
         if (typeof element.children !== 'undefined') {
-            [...element.children].forEach((childNode: Element) => {
+            [...element.children].forEach((childNode: M) => {
                 accumulator = this.getBlockElements(accumulator, childNode, requiredBlockName);
             });
         }
