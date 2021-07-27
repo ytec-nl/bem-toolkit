@@ -46,7 +46,7 @@ export default class BEMNodes {
             bemnodes[key].blockName = blockName;
         } else {
             try {
-                bemnodes[key].push(element);
+                if (bemnodes[key].indexOf(element) === -1) bemnodes[key].push(element);
             } catch (err) {
                 if (typeof bemnodes[key] === 'function') {
                     throw new Error(

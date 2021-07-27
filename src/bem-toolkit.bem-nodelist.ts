@@ -41,6 +41,19 @@ export default class BEMNodeList extends Array<Element> {
     }
 
     /**
+     * Returns a BEMNodelist containing all elements that do not have a certain BEM modifier
+     * @param modifier BEM modifier string
+     */
+    public withoutModifier(modifier: string): BEMNodeList {
+        const nodes = new BEMNodeList();
+        this.forEach((element: Element) => {
+            if (!element.getBEMModifiers().includes(modifier)) nodes.push(element);
+        });
+
+        return nodes;
+    }
+
+    /**
      * Adds an event listener to all elements in the BEMNodeList
      * @param type A case-sensitive string representing the event type to listen for.
      * @param listener Callback that is called when the event occurs
