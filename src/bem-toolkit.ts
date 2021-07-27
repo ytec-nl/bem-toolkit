@@ -12,7 +12,11 @@ declare global {
         hasBEMModifier(modifier: string, requiredBlockName?: string): boolean;
         toggleBEMModifier(modifier: string, force?: boolean, requiredBlockName?: string): void;
         getBEMBlockRoot(requiredBlockName?: string): Element;
-        getNodes(mustInclude?: string[], requiredBlockName?: string): BEMNodes;
+        getNodes(
+            direction: 'default' | 'ancestor' | 'global',
+            mustInclude?: string[],
+            requiredBlockName?: string
+        ): BEMNodes;
         findBEM(
             elementName: string,
             modifierName?: string,
@@ -27,19 +31,19 @@ declare global {
  *
  * @param blockNameNeedle Try to find a class with this block name
  */
-Element.prototype.getBEMBlockName = function getBEMBlockName(blockNameNeedle?: string): string {
+Element.prototype.getBEMBlockName = function getBEMBlockName(requiredBlockName?: string): string {
     const classList = new ClassList(this);
 
     if (typeof classList === 'undefined' || !(classList.length > 0)) return undefined;
 
-    if (blockNameNeedle) {
+    if (requiredBlockName) {
         /**
-         * If blockNameNeedle is given, find first class that has that blockname and return that as the block name
+         * If requiredBlockName is given, find first class that has that blockname and return that as the block name
          */
         for (let index = 0; index < classList.length; index++) {
             const elClass = classList[index];
             const blockName = elClass.split('__')[0];
-            if (blockName === blockNameNeedle) return blockName;
+            if (blockName === requiredBlockName) return blockName;
         }
 
         return undefined;
@@ -183,8 +187,12 @@ Element.prototype.getBEMBlockRoot = function getBEMBlockRoot(requiredBlockName?:
 /**
  * Returns a BEMNodes element with it's base in the Element
  */
-Element.prototype.getNodes = function getNodes(mustInclude?: string[], requiredBlockName?: string): BEMNodes {
-    return new BEMNodes(this, { mustInclude, blockName: requiredBlockName });
+Element.prototype.getNodes = function getNodes(
+    direction: 'default' | 'ancestor' | 'global' = 'default',
+    mustInclude?: string[],
+    requiredBlockName?: string
+): BEMNodes {
+    return new BEMNodes(this, { mustInclude, blockName: requiredBlockName, direction });
 };
 
 /**

@@ -35,6 +35,30 @@ const nodes2 = new BEMNodes(element);
 
 # Documentation
 
+### _Element_.getBEMBlockName([_requiredBlockName_])
+
+Returns the BEM blockname that was deduced from the class list of the element. Returns _undefined_ if no blockname was found.
+
+#### _requiredBlockName_ Required BEM blockname of the returned class.
+
+---
+
+### _Element_.getBEMElementName([_requiredBlockName_])
+
+Returns the BEM Elementname that was deduced from the class list of the element. Returns _undefined_ if no blockname was found.
+
+#### _requiredBlockName_ Required blockname of the returned class.
+
+---
+
+### _Element_.getBEMModifiers([_requiredBlockName_])
+
+Returns an array of strings of all modifiers the deduced element has on this element
+
+#### _requiredBlockName_ Required blockname of the element that has the modifiers
+
+---
+
 ## BEMNodes
 
 BEMNodes(target, options)
